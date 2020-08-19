@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+import time
 import os
 from typing import Any, Dict, List, Optional, Text
 
@@ -189,8 +190,10 @@ class Trainer:
         for i, component in enumerate(self.pipeline):
             logger.info(f"Starting to train component {component.name}")
             component.prepare_partial_processing(self.pipeline[:i], context)
+            start = time.time()
             updates = component.train(working_data, self.config, **context)
-            logger.info("Finished training component.")
+            end = time.time()
+            logger.info(f"Finished training component ({(end - start):.2f} ms).")
             if updates:
                 context.update(updates)
 

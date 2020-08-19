@@ -96,6 +96,7 @@ class CRFEntityExtractor(EntityExtractor):
         # Name of dense featurizers to use.
         # If list is empty all available dense features are used.
         "featurizers": [],
+        "exclude_token_features": False,
     }
 
     function_dict: Dict[Text, Callable[[CRFToken], Any]] = {
@@ -136,6 +137,10 @@ class CRFEntityExtractor(EntityExtractor):
         ]
 
         self._validate_configuration()
+
+        self.exclude_token_features = self.component_config.get(
+            "exclude_token_features", False
+        )
 
     def _validate_configuration(self) -> None:
         if len(self.component_config.get("features", [])) % 2 != 1:
@@ -416,6 +421,8 @@ class CRFEntityExtractor(EntityExtractor):
                 prefix = prefixes[current_feature_idx]
 
                 for feature in features:
+                    if self.exclude_token_features and feature != "entity":
+                        continue
                     if feature == "pattern":
                         # add all regexes extracted from the 'RegexFeaturizer' as a
                         # feature: 'pattern_name' is the name of the pattern the user

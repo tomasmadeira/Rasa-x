@@ -245,6 +245,7 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
         # Specify what features to use as sequence and sentence features
         # By default all features in the pipeline are used.
         FEATURIZERS: [],
+        "exclude_token_features": False,
     }
 
     # init helpers
