@@ -433,7 +433,12 @@ class CRFEntityExtractor(EntityExtractor):
                 prefix = prefixes[current_feature_idx]
 
                 for feature in features:
-                    if self.exclude_token_features and feature != "entity":
+                    if (
+                        self.exclude_token_features
+                        and include_tag_features
+                        and prefix == "0"
+                        and feature != "entity"
+                    ):
                         continue
                     if feature == "pattern":
                         # add all regexes extracted from the 'RegexFeaturizer' as a
