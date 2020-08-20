@@ -602,4 +602,4 @@ class CRFEntityExtractor(EntityExtractor):
 
             self.entity_taggers[tag_name] = entity_tagger
 
-            logger.debug("Training finished.")
+            logger.info("Training finished.")

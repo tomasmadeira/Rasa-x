@@ -837,9 +837,10 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
             config=self.component_config,
         )
 
-        logger.info(
-            f"Training CRF for following tags: {[tag.tag_name for tag in self._entity_tag_specs]}."
-        )
+        if self._entity_tag_specs:
+            logger.info(
+                f"Training CRF for following tags: {[tag.tag_name for tag in self._entity_tag_specs]}."
+            )
 
         self.model.fit(
             model_data,
