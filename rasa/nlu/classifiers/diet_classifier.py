@@ -245,7 +245,7 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
         # Specify what features to use as sequence and sentence features
         # By default all features in the pipeline are used.
         FEATURIZERS: [],
-        "exclude_token_features": False,
+        "use_entity_roles_groups": True,
     }
 
     # init helpers
@@ -326,6 +326,10 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
         self._label_data: Optional[RasaModelData] = None
         self._data_example: Optional[Dict[Text, List[np.ndarray]]] = None
 
+        self.use_entity_roles_groups = self.component_config.get(
+            "use_entity_roles_groups", True
+        )
+
     @property
     def label_key(self) -> Optional[Text]:
         return LABEL_IDS if self.component_config[INTENT_CLASSIFICATION] else None
@@ -360,6 +364,12 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
         _tag_specs = []
 
         for tag_name in POSSIBLE_TAGS:
+            if not self.use_entity_roles_groups and tag_name in [
+                ENTITY_ATTRIBUTE_ROLE,
+                ENTITY_ATTRIBUTE_GROUP,
+            ]:
+                continue
+
             if self.component_config[BILOU_FLAG]:
                 tag_id_index_mapping = bilou_utils.build_tag_id_dict(
                     training_data, tag_name
@@ -825,6 +835,10 @@ class DIETClassifier(IntentClassifier, EntityExtractor):
             label_data=self._label_data,
             entity_tag_specs=self._entity_tag_specs,
             config=self.component_config,
+        )
+
+        logger.info(
+            f"Training CRF for following tags: {[tag.tag_name for tag in self._entity_tag_specs]}."
         )
 
         self.model.fit(
