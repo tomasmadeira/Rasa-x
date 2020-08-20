@@ -1302,6 +1302,7 @@ def get_eval_data(
     )
 
     should_eval_entities = is_entity_extractor_present(interpreter)
+    should_eval_roles_groups = extractor_predicts_roles_groups(interpreter)
 
     for example in tqdm(test_data.training_examples):
         result = interpreter.parse(example.text, only_output_properties=False)
@@ -1348,9 +1349,14 @@ def get_eval_data(
             )
 
         if should_eval_entities:
+            gold_entities = example.get(ENTITIES, [])
+            if not should_eval_roles_groups:
+                for e in gold_entities:
+                    e[ENTITY_ATTRIBUTE_ROLE] = None
+                    e[ENTITY_ATTRIBUTE_GROUP] = None
             entity_results.append(
                 EntityEvaluationResult(
-                    example.get(ENTITIES, []),
+                    gold_entities,
                     result.get(ENTITIES, []),
                     result.get(TOKENS_NAMES[TEXT], []),
                     result.get(TEXT, ""),
@@ -1390,6 +1396,21 @@ def is_entity_extractor_present(interpreter: Interpreter) -> bool:
 
     extractors = get_entity_extractors(interpreter)
     return extractors != []
+
+
+def extractor_predicts_roles_groups(interpreter: Interpreter) -> bool:
+    from rasa.nlu.extractors.extractor import EntityExtractor
+
+    for c in interpreter.pipeline:
+        if isinstance(c, EntityExtractor):
+            if c.name == "DIETClassifier":
+                if c.component_config["use_entity_roles_groups"]:
+                    return True
+            elif c.name == "CRFEntityExtractor":
+                if c.component_config["use_entity_roles_groups"]:
+                    return True
+
+    return False
 
 
 def is_intent_classifier_present(interpreter: Interpreter) -> bool:
