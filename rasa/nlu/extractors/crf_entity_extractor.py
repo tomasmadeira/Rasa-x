@@ -97,6 +97,7 @@ class CRFEntityExtractor(EntityExtractor):
         # If list is empty all available dense features are used.
         "featurizers": [],
         "exclude_token_features": False,
+        "use_entity_roles_groups": True,
     }
 
     function_dict: Dict[Text, Callable[[CRFToken], Any]] = {
@@ -140,6 +141,9 @@ class CRFEntityExtractor(EntityExtractor):
 
         self.exclude_token_features = self.component_config.get(
             "exclude_token_features", False
+        )
+        self.use_entity_roles_groups = self.component_config.get(
+            "use_entity_roles_groups", True
         )
 
     def _validate_configuration(self) -> None:
@@ -191,9 +195,17 @@ class CRFEntityExtractor(EntityExtractor):
         for tag_name in self.crf_order:
             if tag_name == ENTITY_ATTRIBUTE_TYPE and training_data.entities:
                 _crf_order.append(ENTITY_ATTRIBUTE_TYPE)
-            elif tag_name == ENTITY_ATTRIBUTE_ROLE and training_data.entity_roles:
+            elif (
+                tag_name == ENTITY_ATTRIBUTE_ROLE
+                and training_data.entity_roles
+                and self.use_entity_roles_groups
+            ):
                 _crf_order.append(ENTITY_ATTRIBUTE_ROLE)
-            elif tag_name == ENTITY_ATTRIBUTE_GROUP and training_data.entity_groups:
+            elif (
+                tag_name == ENTITY_ATTRIBUTE_GROUP
+                and training_data.entity_groups
+                and self.use_entity_roles_groups
+            ):
                 _crf_order.append(ENTITY_ATTRIBUTE_GROUP)
 
         self.crf_order = _crf_order
@@ -563,7 +575,7 @@ class CRFEntityExtractor(EntityExtractor):
         self.entity_taggers = {}
 
         for tag_name in self.crf_order:
-            logger.debug(f"Training CRF for '{tag_name}'.")
+            logger.info(f"Training CRF for '{tag_name}'.")
 
             # add entity tag features for second level CRFs
             include_tag_features = tag_name != ENTITY_ATTRIBUTE_TYPE
