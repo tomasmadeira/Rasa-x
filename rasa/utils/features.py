@@ -1,4 +1,4 @@
-from typing import Union, Text, Optional, List
+from typing import Union, Text, Optional, List, Dict, Tuple
 
 import numpy as np
 import scipy.sparse
@@ -87,3 +87,15 @@ class Features:
             )
 
         self.features = hstack([self.features, additional_features.features])
+
+    def get_feature_info(
+        self,
+    ) -> Dict[Text, Union[bool, Text, Tuple[int], Union[Text, List[Text]]]]:
+        return {
+            "is_sparse": self.is_sparse(),
+            "shape": self.features.shape,
+            "attribute": self.attribute,
+            "type": self.type,
+            "dtype": self.features.dtype,
+            "origin": self.origin,
+        }
