@@ -414,6 +414,12 @@ class CRFEntityExtractor(EntityExtractor):
                 prefix = prefixes[current_feature_idx]
 
                 for feature in features:
+                    # When the features for the role and group labels are created
+                    # do not add the features for the current token (position 0 in
+                    # window). Instead just add the entity tag as feature.
+                    if include_tag_features and prefix == "0" and feature != "entity":
+                        continue
+
                     if feature == "pattern":
                         # add all regexes extracted from the 'RegexFeaturizer' as a
                         # feature: 'pattern_name' is the name of the pattern the user
