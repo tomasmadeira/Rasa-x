@@ -592,6 +592,11 @@ class CRFEntityExtractor(EntityExtractor):
                 self._crf_tokens_to_tags(sentence, tag_name) for sentence in df_train
             ]
 
+            logger.info(f"Number of max features: {max([len(x) for x in X_train])}")
+            distinct_tags = set([x for y in y_train for x in y])
+            logger.info(f"Number of tags: {len(distinct_tags)}")
+            logger.info(f"Tags: {distinct_tags}")
+
             entity_tagger = sklearn_crfsuite.CRF(
                 algorithm="lbfgs",
                 # coefficient for L1 penalty
