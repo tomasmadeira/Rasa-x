@@ -592,7 +592,12 @@ class CRFEntityExtractor(EntityExtractor):
                 self._crf_tokens_to_tags(sentence, tag_name) for sentence in df_train
             ]
 
-            logger.info(f"Number of max features: {max([len(x) for x in X_train])}")
+            logger.info(
+                f"Number of max token features: {max([len(n) for x in X_train for n in x])}"
+            )
+            logger.info(
+                f"Number of all features: {sum([len(n) for x in X_train for n in x])}"
+            )
             distinct_tags = set([x for y in y_train for x in y])
             logger.info(f"Number of tags: {len(distinct_tags)}")
             logger.info(f"Tags: {distinct_tags}")
