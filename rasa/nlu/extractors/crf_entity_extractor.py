@@ -425,14 +425,16 @@ class CRFEntityExtractor(EntityExtractor):
                 # get the features to extract for the token we are currently looking at
                 current_feature_idx = pointer_position + half_window_size
                 features = configured_features[current_feature_idx]
-                # we add the 'entity' feature to include the entity type as features
-                # for the role and group CRFs
-                if include_tag_features:
-                    features.append("entity")
 
                 prefix = prefixes[current_feature_idx]
 
-                for feature in features:
+                # we add the 'entity' feature to include the entity type as features
+                # for the role and group CRFs
+                additional_features = []
+                if include_tag_features and prefix == "0":
+                    additional_features.append("entity")
+
+                for feature in features + additional_features:
                     if (
                         self.exclude_token_features
                         and include_tag_features
@@ -529,8 +531,8 @@ class CRFEntityExtractor(EntityExtractor):
         for i, token in enumerate(tokens):
             pattern = self._pattern_of_token(message, i)
             entity = self.get_tag_for(tags, ENTITY_ATTRIBUTE_TYPE, i)
-            group = self.get_tag_for(tags, ENTITY_ATTRIBUTE_GROUP, i)
             role = self.get_tag_for(tags, ENTITY_ATTRIBUTE_ROLE, i)
+            group = self.get_tag_for(tags, ENTITY_ATTRIBUTE_GROUP, i)
             pos_tag = token.get(POS_TAG_KEY)
             dense_features = (
                 text_dense_features[i] if text_dense_features is not None else []
