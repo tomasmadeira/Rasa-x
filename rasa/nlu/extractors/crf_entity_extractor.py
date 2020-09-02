@@ -431,7 +431,7 @@ class CRFEntityExtractor(EntityExtractor):
                 # we add the 'entity' feature to include the entity type as features
                 # for the role and group CRFs
                 additional_features = []
-                if include_tag_features and prefix == "0":
+                if include_tag_features:
                     additional_features.append("entity")
 
                 for feature in features + additional_features:
